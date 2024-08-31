@@ -32,13 +32,6 @@ cd fastapi-app
 docker-compose up --build
 ```
 
-### 3. Run Database Migrations
-To run migrations, use the following command:
-
-```
-docker-compose exec web alembic upgrade head
-```
-
 ## API Usage
 ### API Documentation
 After starting the application, you can access the interactive Swagger documentation at:
