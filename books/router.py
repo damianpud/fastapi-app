@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
-from fastapi_pagination import Page, paginate
+from fastapi_pagination import Page
 
 from books import crud
 from books import schemas
@@ -19,8 +19,7 @@ def get_db():
 
 @books_router.get("/genres/", response_model=Page[schemas.Genre])
 def genres(db: Session = Depends(get_db)):
-    db_genres = crud.get_genres(db)
-    return paginate(db_genres)
+    return crud.get_genres(db)
 
 
 @books_router.get("/genres/{genre_id}", response_model=schemas.Genre)
@@ -54,8 +53,7 @@ def delete_genre(genre_id: int, db: Session = Depends(get_db)):
 
 @books_router.get("/authors/", response_model=Page[schemas.Author])
 def authors(db: Session = Depends(get_db)):
-    db_authors = crud.get_authors(db)
-    return paginate(db_authors)
+    return crud.get_authors(db)
 
 
 @books_router.get("/authors/{author_id}", response_model=schemas.Author)
@@ -89,8 +87,7 @@ def delete_author(author_id: int, db: Session = Depends(get_db)):
 
 @books_router.get("/books/", response_model=Page[schemas.Book])
 def books(db: Session = Depends(get_db)):
-    db_books = crud.get_books(db)
-    return paginate(db_books)
+    return crud.get_books(db)
 
 
 @books_router.get("/books/{book_id}", response_model=schemas.Book)

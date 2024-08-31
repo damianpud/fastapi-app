@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import select
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 from books import models
 from books import schemas
@@ -9,7 +11,7 @@ def get_genre(db: Session, genre_id: int):
 
 
 def get_genres(db: Session):
-    return db.query(models.Genre).all()
+    return paginate(db, select(models.Genre))
 
 
 def create_genre(db: Session, genre: schemas.GenreCreate):
@@ -46,7 +48,7 @@ def get_author(db: Session, author_id: int):
 
 
 def get_authors(db: Session):
-    return db.query(models.Author).all()
+    return paginate(db, select(models.Author))
 
 
 def create_author(db: Session, author: schemas.AuthorCreate):
@@ -89,7 +91,7 @@ def get_book(db: Session, book_id: int):
 
 
 def get_books(db: Session):
-    return db.query(models.Book).all()
+    return paginate(db, select(models.Book))
 
 
 def create_book(db: Session, book: schemas.BookCreate):
