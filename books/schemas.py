@@ -34,9 +34,6 @@ class AuthorBase(BaseModel):
     @classmethod
     @field_validator('date_of_birth')
     def validate_date_of_birth(cls, value):
-        print(value)
-        print(date.today())
-        print(value > date.today())
         if value > date.today():
             raise ValueError('Date of birth cannot be in the future.')
         return value
