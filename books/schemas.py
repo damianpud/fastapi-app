@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, validator, ValidationError
+from pydantic import BaseModel, Field, model_validator
 from datetime import date, datetime
 from sqlalchemy.orm import Session
 
@@ -22,7 +22,7 @@ class Genre(GenreBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class AuthorBase(BaseModel):
@@ -31,16 +31,14 @@ class AuthorBase(BaseModel):
     date_of_birth: date
     country: str = Field(min_length=2, max_length=50)
 
-    @classmethod
-    @field_validator('date_of_birth')
-    def validate_date_of_birth(cls, value):
-        if value > date.today():
-            raise ValueError('Date of birth cannot be in the future.')
-        return value
-
 
 class AuthorCreate(AuthorBase):
-    pass
+
+    @model_validator(mode='after')
+    def check_passwords_match(self):
+        if self.date_of_birth > date.today():
+            raise ValueError('Date of birth cannot be in the future.')
+        return self
 
 
 class AuthorUpdate(AuthorBase):
@@ -51,7 +49,7 @@ class Author(AuthorBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class BookBase(BaseModel):
@@ -60,35 +58,23 @@ class BookBase(BaseModel):
     rating: int = Field(ge=1, le=10)
     description: str = Field(max_length=1000)
 
-    @classmethod
-    @field_validator('publication_date')
-    def validate_publication_date(cls, value):
-        if value > date.today():
-            raise ValueError('Publication date cannot be in the future.')
-        return value
-
 
 class BookCreate(BookBase):
     author_id: int
     genre_id: int
 
-    @classmethod
-    @field_validator('author_id')
-    def validate_author_exists(cls, value):
+    @model_validator(mode='after')
+    def check_passwords_match(self):
         db: Session = SessionLocal()
-        author = crud.get_author(db, author_id=value)
+        author = crud.get_author(db, author_id=self.author_id)
         if author is None:
-            raise ValueError(f'Author with id {value} does not exist.')
-        return value
-
-    @classmethod
-    @field_validator('genre_id')
-    def validate_genre_exists(cls, value):
-        db: Session = SessionLocal()
-        genre = crud.get_genre(db, genre_id=value)
+            raise ValueError(f'Author with id {self.author_id} does not exist.')
+        genre = crud.get_genre(db, genre_id=self.genre_id)
         if genre is None:
-            raise ValueError(f'Genre with id {value} does not exist.')
-        return value
+            raise ValueError(f'Genre with id {self.genre_id} does not exist.')
+        if self.publication_date > date.today():
+            raise ValueError('Publication date cannot be in the future.')
+        return self
 
 
 class BookUpdate(BookCreate):
@@ -102,4 +88,4 @@ class Book(BookBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
